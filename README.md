@@ -17,12 +17,12 @@ run_kraken.py -idx {} input.csv noNi
 
 # 3D conversion
 - if you only have smiles codes of the ligands, please use any of the following "3D_conversion_flag" in your input.csv file:
--- 0: rdkit will be used to convert the smiles code to 3D
--- 1: molconvert (ChemAxon) will be used to convert the smiles code to 3D
--- 3: obabel will be used to convert the smiles code to 3D
--- 4: all aforementioned methods will be tried to convert the smiles code to 3D
+  - 0: rdkit will be used to convert the smiles code to 3D
+  - 1: molconvert (ChemAxon) will be used to convert the smiles code to 3D
+  - 3: obabel will be used to convert the smiles code to 3D
+  - 4: all aforementioned methods will be tried to convert the smiles code to 3D
 - if you already have 3D coordinate files in xyz format, you can use the following "3D_conversion_flag" in your input.csv file:
--- 2: searches for a file input_structures_Ni/#ID.xyz or input_structures_noNi/#ID.xyz
+  - 2: searches for a file input_structures_Ni/#ID.xyz or input_structures_noNi/#ID.xyz
 
 # Functionality
 1.1 reads a xyz file in input_structures/xyzfilename.xyz  
