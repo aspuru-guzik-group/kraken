@@ -14,14 +14,6 @@ import subprocess
 import shlex
 import yaml
 
-#sys.path.append("/home/pascal/Desktop/projects/toronto_ligands_reactions/Sterimol/sterimol")
-#sys.path.append("/home/a/aspuru/pascalf/codes/Sterimol/sterimol")
-#from sterimoltools import calcSterimol
-#from steriplus import ConeAngle
-#from steriplus import Sterimol
-#from steriplus import SASA
-#from steriplus import BuriedVolume
-#from steriplus import Dispersion
 
 from morfeus import BuriedVolume
 from morfeus import Pyramidalization
