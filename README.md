@@ -6,6 +6,10 @@ Code to compute electronic and steric features to create a database of ligands a
 - crest
 - morfeus (like will be added soon)
 - python 3.6, standard packages such as numpy, scipy, yaml, ...
+- rdkit
+- cython
+- openbabel
+- Gaussian
 
 # Recommended usage
 - copy and adjust one of the yml files in example_settings to your working directory and name it settings.yml
