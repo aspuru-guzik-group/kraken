@@ -1,0 +1,137 @@
+#!/bin/bash
+# 
+# This script is used to submit a single Gaussian computation
+# Setup: make a folder called \bin in your home directory on the server 
+#        copy this file there and grant yourself "execute" permission, eg. with the "chmod 744 sub16" command
+# Use: in the shell, navigate to the folder containing the .com-file to be run using "cd" commands
+#      to submit, type: sub16 <filename without .com> X
+#      where X is the requested wall time in hours
+# 
+host=$(hostname)
+echo "#!/bin/csh" > $1.slurm
+confdir=$1
+confname=${confdir##*/}
+echo "#SBATCH --partition=notchpeak">> $1.slurm #"${host::-1} 
+echo "#SBATCH --account=sigman"$3 >> $1.slurm 
+echo "#SBATCH --time="$2":00:00" >> $1.slurm
+echo "#SBATCH --nodes=1" >> $1.slurm
+echo "#SBATCH -o slurm-%j.out-%N" >> $1.slurm
+echo "#SBATCH -e slurm-%j.err-%N" >> $1.slurm
+echo "env | grep SLURM" >> $1.slurm
+echo "setenv WORKDIR "$1 >> $1.slurm  #$PWD >> $1.slurm
+echo "setenv FILENAME "$1"/"$confname >> $1.slurm
+echo "if \$UUFSCELL ==  "lonepeak.peaks" then">>$1.slurm
+echo "   setenv SCRFLAG GENERAL" >> $1.slurm
+echo "else " >> $1.slurm
+echo "   setenv SCRFLAG LOCAL" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "setenv NODES 1" >> $1.slurm
+echo "cd "$1 >> $1.slurm  #$PWD >> $1.slurm
+echo "sed -i s/%NProcShared='.\+'/%NProcShared=\$SLURM_CPUS_ON_NODE/g \${FILENAME}.com" >> $1.slurm
+echo "sed -i s/%nprocshared='.\+'/%NProcShared=\$SLURM_CPUS_ON_NODE/g \${FILENAME}.com" >> $1.slurm
+echo "sed -i s/%nprocs='.\+'/%NProcShared=\$SLURM_CPUS_ON_NODE/g \${FILENAME}.com" >> $1.slurm
+echo "if (\$UUFSCELL ==  "lonepeak.peaks") then" >> $1.slurm
+echo "   module load gaussian16/AVX.C01" >> $1.slurm
+echo "  else " >> $1.slurm
+echo "                module load gaussian16/SSE4.C01 " >> $1.slurm
+echo "  endif" >> $1.slurm
+echo "endif     " >> $1.slurm
+echo "if ( \$UUFSCELL ==  "tangent.peaks") then" >> $1.slurm
+echo "   module load gaussian16/AVX.C01" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if ( $UUFSCELL ==  "notchpeak.peaks") then" >> $1.slurm
+echo "   module load gaussian16/AVX2.C01" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if (\$UUFSCELL ==  "kingspeak.peaks") then" >> $1.slurm
+echo "  if (\$SLURM_CPUS_ON_NODE == 24 | \$SLURM_CPUS_ON_NODE == 28 ) then" >> $1.slurm
+echo "                module load gaussian16/AVX2.C01" >> $1.slurm
+echo "  else " >> $1.slurm
+echo "                module load gaussian16/AVX.C01 " >> $1.slurm
+echo "  endif" >> $1.slurm
+echo "endif          " >> $1.slurm
+echo "if (\$UUFSCELL ==  "ash.peaks") then" >> $1.slurm
+echo "  if (\$SLURM_CPUS_ON_NODE == 12 ) then" >> $1.slurm
+echo "                module load gaussian16/SSE4.C01" >> $1.slurm
+echo "  else if (\$SLURM_CPUS_ON_NODE == 20 ) then" >> $1.slurm
+echo "                module load gaussian16/AVX.C01" >> $1.slurm
+echo "  else" >> $1.slurm
+echo "                module load gaussian16/AVX2.C01 " >> $1.slurm
+echo "  endif" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "ml" >> $1.slurm
+echo "setenv MP_NEWJOB yes" >> $1.slurm
+echo "setenv LINDA_CLC network" >> $1.slurm
+echo "setenv LINDA_FLC network" >> $1.slurm
+echo "unfchk \$FILENAME.fchk" >> $1.slurm
+echo "if ("\$SCRFLAG" == "LOCAL") then" >> $1.slurm
+echo "  setenv GAUSS_SCRDIR  /scratch/local/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "  mkdir -p /scratch/local/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "  mkdir -p \$WORKDIR/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cd \$WORKDIR/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.com ." >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.chk ." >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if ("\$SCRFLAG" == "KPSERIAL") then" >> $1.slurm
+echo "  setenv GAUSS_SCRDIR  /scratch/kingspeak/serial/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "  mkdir -p /scratch/kingspeak/serial/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cd /scratch/kingspeak/serial/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.com ." >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.chk ." >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if ("\$SCRFLAG" == "GENERAL") then" >> $1.slurm
+echo "  setenv GAUSS_SCRDIR  /scratch/general/lustre/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "  mkdir -p /scratch/general/lustre/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cd /scratch/general/lustre/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.com ." >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.chk ." >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if ("\$SCRFLAG" == "LPSERIAL") then" >> $1.slurm
+echo "  setenv GAUSS_SCRDIR  /scratch/general/lustre/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "  mkdir -p /scratch/general/lustre/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cd /scratch/general/lustre/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.com ." >> $1.slurm
+echo "   cp \$WORKDIR/\$FILENAME.chk ." >> $1.slurm
+echo "endif" >> $1.slurm
+echo "printenv" >> $1.slurm
+echo "#echo \$GAUSS_SCRDIR" >> $1.slurm
+echo "#echo \$SHELL" >> $1.slurm
+echo "#echo \$SLURM_NODELIST" >> $1.slurm
+echo "if ("\$NODES" == "1") then" >> $1.slurm
+echo "    srun g16 \$FILENAME.com" >> $1.slurm
+echo "else" >> $1.slurm
+echo "srun hostname -s | sort -u > tsnet.nodes.\$SLURM_JOBID" >> $1.slurm
+echo "cat tsnet.nodes.\$SLURM_JOBID | uniq > nodes.tmp" >> $1.slurm
+echo "setenv GAUSS_LFLAGS '-nodefile tsnet.nodes.\$SLURM_JOBID -opt "Tsnet.Node.lindarsharg: ssh"'" >> $1.slurm
+echo "    source /uufs/chpc.utah.edu/sys/installdir/gaussian16/etc/parascript.csh > Default.Route" >> $1.slurm
+echo "    g16 \$FILENAME.com" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if ("\$SCRFLAG" == "KPSERIAL") then" >> $1.slurm
+echo "  cp *.log \$WORKDIR/." >> $1.slurm
+echo "  cp *.chk \$WORKDIR/." >> $1.slurm
+echo "  cp *.wfn \$WORKDIR/." >> $1.slurm
+echo "  cp fort* \$WORKDIR/." >> $1.slurm
+echo "  cd .." >> $1.slurm
+echo "  rm -r /scratch/kingspeak/serial/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if ("\$SCRFLAG" == "GENERAL") then" >> $1.slurm
+echo "  cp *.log \$WORKDIR/." >> $1.slurm
+echo "  cp *.chk \$WORKDIR/." >> $1.slurm
+echo "  cp *.wfn \$WORKDIR/." >> $1.slurm
+echo "  cp fort* \$WORKDIR/." >> $1.slurm
+echo "  cd .." >> $1.slurm
+echo "  rm -r /scratch/general/lustre/\$USER/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "if ("\$SCRFLAG" == "LOCAL") then" >> $1.slurm
+echo "  cp *.log \$WORKDIR/." >> $1.slurm
+echo "  cp *.chk \$WORKDIR/." >> $1.slurm
+echo "  cp *.wfn \$WORKDIR/." >> $1.slurm
+echo "  cp fort* \$WORKDIR/." >> $1.slurm
+echo "  cd .." >> $1.slurm
+echo "  rm -r \$WORKDIR/\$SLURM_JOB_ID/\$UUFSCELL" >> $1.slurm
+echo "endif" >> $1.slurm
+echo "cd \$WORKDIR" >> $1.slurm
+echo "formchk \$FILENAME.chk \$FILENAME.fchk" >> $1.slurm
+echo "rm "$1"/"$confname".chk" >> $1.slurm
+echo "#----- End of g16job ---------" >> $1.slurm
+sbatch $1.slurm
+
