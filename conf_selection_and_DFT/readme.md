@@ -1,21 +1,21 @@
 The full kraken workflow involves three steps. This folder contains scripts and information for steps 2 and 3. 
-# Step 1. CREST conformer search + xTB calculations
+## Step 1. CREST conformer search + xTB calculations
 - see folder for instructions and information
 
-# Step 2. conformer selection + DFT calculations
+## Step 2. conformer selection + DFT calculations
 - input: results (ymls) from XTB workflow portion
 - recommended usage
 	- edit conformer_selection.py to refer to example_ligands.txt
 	- replace sub16_PL with equivalent submission script
 	- submit job as `sbatch conf_script.sh` or equivalent
 
-# Step 3. gather and condense properties 
+## Step 3. gather and condense properties 
 - input: results from conformer selection + DFT calculations workflow portion
 - recommended usage
 	- submit job as `sbatch end_script.sh` or equivalent 
 
 	
-# Requirements
+## Requirements
 - xTB
 - crest
 - Gaussian
@@ -26,6 +26,7 @@ The full kraken workflow involves three steps. This folder contains scripts and 
 - cython
 - numpy, scipy, yaml, seaborn, time, r-uuid, r-getpass, pathlib, cclib, pyvista, vtk, sympy, tqdm, dataclasses, fire, joblib
 
+---
 
 note: v0 scripts contain user-specific paths. these will be condensed in a future update. path locations are listed below. 
 - ded.py							              lines 13, 14
