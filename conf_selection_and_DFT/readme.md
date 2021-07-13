@@ -7,6 +7,7 @@ The full kraken workflow involves three steps. This folder contains scripts and 
 - recommended usage
 	- edit conformer_selection.py to refer to example_ligands.txt
 	- replace sub16_PL with equivalent submission script
+	- add Multiwfn 3.7 to Pint directory
 	- submit job as `sbatch conf_script.sh` or equivalent
 
 ## Step 3. gather and condense properties 
